@@ -1,0 +1,23 @@
+func move(sender :UIPanGestureRecognizer!){
+        if sender.state==UIGestureRecognizerState.Began{
+            //fire
+            println("fire");
+            fireTimer=NSTimer.scheduledTimerWithTimeInterval(0.2, target: self, selector: bullet(), userInfo: nil, repeats: true);
+            fireTimer.fire();
+            
+        }else if sender.state==UIGestureRecognizerState.Changed{
+            
+            var p=sender.locationInView(self.view!);
+            flight.center=p;
+//            println("\(p)");
+            
+        }else if sender.state==UIGestureRecognizerState.Ended{
+            //endfire
+            println("endfire");
+            fireTimer.invalidate();
+            
+        }
+    }
+	
+move();
+	

@@ -1,0 +1,6 @@
+D:\programming\Метрология\mayers_swift\mayers_swift\bin\Debug\mayers_swift.exe.config
+D:\programming\Метрология\mayers_swift\mayers_swift\bin\Debug\mayers_swift.exe
+D:\programming\Метрология\mayers_swift\mayers_swift\bin\Debug\mayers_swift.pdb
+D:\programming\Метрология\mayers_swift\mayers_swift\obj\Debug\mayers_swift.csprojResolveAssemblyReference.cache
+D:\programming\Метрология\mayers_swift\mayers_swift\obj\Debug\mayers_swift.exe
+D:\programming\Метрология\mayers_swift\mayers_swift\obj\Debug\mayers_swift.pdb

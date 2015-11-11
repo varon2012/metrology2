@@ -1,0 +1,47 @@
+class MyClass{ 
+	
+	func myElseFunc(){
+		if (a > b) && (a != b){
+			
+		}
+		else if b > c{
+			
+		return g
+		}
+		switch a{
+		case 1 : a
+		case 2 : b
+		default : c
+		return d
+		}
+	}
+
+	func myFunc(a: int, b: string) -> string{
+   	   a = 10
+    	   b = "stroka"
+   	   if a = b {
+		myElseFunc(a > b ? a : b)}
+	   if a > b {
+		return a}
+	   else 
+		{return b}
+		
+	}
+
+	func newFunc(){
+		while (a != 0) && (b != 0)
+		{
+			y = 0
+		}
+		if a > 0{
+			y = 1}
+		else {
+			y = -1}
+		}
+		
+}
+var a = 12
+var b = "Hello"
+var c = myFunc(a, b)
+newFunc()
+print(b)
