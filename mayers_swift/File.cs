@@ -6,7 +6,13 @@ namespace mayers_swift
     class File
     {
         private StreamReader _file;
-        private bool _isMultiLineComment = false;
+        private bool _isMultiLineComment;
+
+        public File()
+        {
+            _isMultiLineComment = false;
+        }
+
         public void FileOpen()
         {
             _file = new StreamReader("text.txt");                       
