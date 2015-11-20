@@ -121,7 +121,7 @@ namespace mayers_swift
 
         private int GetFunctionCodeValue(string code)// находим цикломатическое число данной функции
         {
-            int result = GetValueMatches(code, @"if|for|while|\?[^:]+:");
+            int result = GetValueMatches(code, @"\sif|\sfor|\swhile|\sguard|\s\?[^:]+:");
             result +=GetSwitchValue(code); // значение веток switch-ей
             return result;
         }
@@ -164,7 +164,7 @@ namespace mayers_swift
             int result = 0;
             result += GetOperatorComplexityNumber(functionCode, @"\sif (.*?){");
             result += GetOperatorComplexityNumber(functionCode, @"\swhile (.*?){");
-            result += GetOperatorComplexityNumber(functionCode, @"\sfor.*?;(.*?);");
+            result += GetOperatorComplexityNumber(functionCode, @"\sfor[^in]*?;(.*?);");
             return result;
         }
 
