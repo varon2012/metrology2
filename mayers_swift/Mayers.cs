@@ -5,7 +5,7 @@ namespace mayers_swift
 {
     class Mayers
     {
-        struct FunctionInfo  // структура, хранящая имя и код функции
+        private struct FunctionInfo  // структура, хранящая имя и код функции
         {
             public string FunctionName;
             public string FunctionCode;
@@ -17,7 +17,7 @@ namespace mayers_swift
             }
         }
 
-        public struct MayersMetrix
+        private struct MayersMetrix
         {
             public int CyclomaticNumber;
             public int PredicateComplecity;
@@ -29,14 +29,12 @@ namespace mayers_swift
         
         public Mayers(string codeText)
         {
-            this._codeText = codeText;
+            _codeText = codeText;
         }
         
-        //public MayersMetrix GetValueMayersMetrix()
         public void GetValueMayersMetrix()
         {
             GetFunctionsNameAndCode();
-          //  GetMainFunction();
             for (int i = 0; i < _arrayFunction.Length; i++)
             {
                 var result = GetSubFunctionsValue(_arrayFunction[i].FunctionName, _arrayFunction[i].FunctionCode);
@@ -50,10 +48,13 @@ namespace mayers_swift
             Console.WriteLine("");
             Console.WriteLine("function {0} = [{1} , {2}]", functionName, result.CyclomaticNumber, result.CyclomaticNumber + result.PredicateComplecity);
         }
-
+        
         private void GetFunctionsNameAndCode()
         {
-            string patternFunctionCode = @"(func\s(\w+)\([^\)]*\)[^{]*{)";
+            const int functionNameGroup = 2;
+            const int functionCodeGroup = 1;
+
+            string patternFunctionCode = @"(func\s(\w+)\s*\([^\)]*\)[^{]*{)";
             Regex regexFunctionCode = new Regex(patternFunctionCode);
             Match matchFunctionCode = regexFunctionCode.Match(_codeText);
 
@@ -61,16 +62,18 @@ namespace mayers_swift
             while (matchFunctionCode.Success)
             {
                 Array.Resize(ref _arrayFunction, numberMatches + 1);
-                FunctionInfo elem = new FunctionInfo(matchFunctionCode.Groups[2].Value, GetFunctionCode(matchFunctionCode.Groups[1].Value, matchFunctionCode.Index));
+                string functionName = matchFunctionCode.Groups[functionNameGroup].Value;
+                string functionCode = GetFunctionCode(matchFunctionCode.Groups[functionCodeGroup].Value, matchFunctionCode.Index);
+                FunctionInfo elem = new FunctionInfo(functionName, functionCode);
                 _arrayFunction[numberMatches] = elem;
                 matchFunctionCode = matchFunctionCode.NextMatch();
                 numberMatches++;
             }
         }
 
-        private string GetFunctionCode(string functionName, int indexStart)
+        private string GetFunctionCode(string functionCode, int indexStart)
         {
-            int startposition = functionName.Length + indexStart;
+            int startposition = functionCode.Length + indexStart;
             int numberOpenBrackets = 1, numberCloseBrackets = 0;
             int i = startposition;
             while (numberOpenBrackets != numberCloseBrackets)
@@ -83,24 +86,7 @@ namespace mayers_swift
             }
             return _codeText.Substring(startposition, i - startposition);            
         }
-/*
-        private void GetMainFunction()
-        {
-            int mainStartPosition = codeText.LastIndexOf("}", StringComparison.Ordinal);
-            string mainFunctionName = "main";
-            char temp = '0';
-            while (GetFunctionCode(mainFunctionName) != null)
-            {
-                mainFunctionName = mainFunctionName + temp;
-                temp++;
-            }
 
-            string mainFunctionCode = codeText.Substring(mainStartPosition);
-            FunctionInfo elem = new FunctionInfo(mainFunctionName, mainFunctionCode);
-            Array.Resize(ref _arrayFunction, _arrayFunction.Length + 1);
-            _arrayFunction[_arrayFunction.Length - 1] = elem;
-        }
-*/
         private MayersMetrix GetSubFunctionsValue(string mainFunctionName, string mainFunctionCode)
         {
             MayersMetrix result;
@@ -135,18 +121,7 @@ namespace mayers_swift
 
         private int GetFunctionCodeValue(string code)// находим цикломатическое число данной функции
         {
-            int result = 0;
-            string pattern = @"if|for|while|\?[^:]+:";
-            Regex regex  = new Regex(pattern);
-            Match match = regex.Match(code);
-            while (match.Success)
-            {
-                if (match.Success)
-                {
-                    result++;
-                }
-                match = match.NextMatch();
-            }
+            int result = GetValueMatches(code, @"if|for|while|\?[^:]+:");
             result +=GetSwitchValue(code); // значение веток switch-ей
             return result;
         }
@@ -155,13 +130,13 @@ namespace mayers_swift
         {
 
             int result = 0;
-            string pattern = @"switch\w*";
+            string pattern = @"\sswitch";
             Regex regex = new Regex(pattern);
             Match match = regex.Match(code);
             if (match.Success)
             {
-                result += GetNumberOperators(@"case", code);
-                result += GetNumberOperators(@"default", code);
+                result += GetNumberOperators(@"\scase", code);
+                result += GetNumberOperators(@"\sdefault", code);
                 return --result;
             }
             return 0;
@@ -169,15 +144,7 @@ namespace mayers_swift
 
         private int GetNumberOperators(string pattern, string code)
         {
-            int result = 0;
-            Regex regex = new Regex(pattern);
-            Match match = regex.Match(code);
-            while (match.Success)
-            {
-                result++;
-                match = match.NextMatch();
-            }
-            return result;
+            return GetValueMatches(code, pattern);
         }
 
         private string GetFunctionCode(string functionName)
@@ -195,9 +162,9 @@ namespace mayers_swift
         private int GetFunctionComplexityNumber(string functionCode)  // сложность предикатов данной функции
         {
             int result = 0;
-            result += GetOperatorComplexityNumber(functionCode, @" if (.*?){");
-            result += GetOperatorComplexityNumber(functionCode, @" while (.*?){");
-            result += GetOperatorComplexityNumber(functionCode, @" for.*?;(.*?);");
+            result += GetOperatorComplexityNumber(functionCode, @"\sif (.*?){");
+            result += GetOperatorComplexityNumber(functionCode, @"\swhile (.*?){");
+            result += GetOperatorComplexityNumber(functionCode, @"\sfor.*?;(.*?);");
             return result;
         }
 
@@ -216,18 +183,23 @@ namespace mayers_swift
 
         private int CountComplexityNumber(string condition) // собственно нахождение сложности выражения 
         {
+            int result = GetValueMatches(condition, @"==|>|<|&+|\|+|!");
+            if (result == 0)
+                return 0;
+            return --result;
+        }
+
+        private int GetValueMatches(string code, string pattern)
+        {
             int result = 0;
-            string pattern = @"==|!=|>|<|!.|&&|\|\|";
             Regex regex = new Regex(pattern);
-            Match match = regex.Match(condition);
+            Match match = regex.Match(code);
             while (match.Success)
             {
                 result++;
                 match = match.NextMatch();
             }
-            if (result == 0)
-                return 0;
-            return --result;
+            return result;
         }
     }
 }
